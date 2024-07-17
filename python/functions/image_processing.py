@@ -10,7 +10,7 @@ class ImageProcessing:
     """ Add information about function"""
     def __init__(self, image_directory):
 
-        self.threshold_v = 100
+        self.threshold = 100
         self.blur_kernel_size = 11
         self.min_area = 30
         self.max_area = 5000
@@ -31,7 +31,7 @@ class ImageProcessing:
 
     """ Add information about function"""
     def setup_trackbars(self, window_name):
-        cv2.createTrackbar('Threshold', window_name, self.threshold_value, 255, self.on_trackbar_change)
+        cv2.createTrackbar('Threshold', window_name, self.threshold, 255, self.on_trackbar_change)
         cv2.createTrackbar('Blur Kernel', window_name, self.blur_kernel_size, 50, self.on_trackbar_change)
         cv2.createTrackbar('Minimum Area', window_name, self.min_area, 5000, self.on_trackbar_change)
         cv2.createTrackbar('Maximum Area', window_name, self.max_area, 10000, self.on_trackbar_change)
@@ -83,7 +83,7 @@ class ImageProcessing:
     def on_mouse(self, event, x, y, flags, param):
         image, keypoints = param
         if event == cv2.EVENT_LBUTTONDOWN:
-            closest_dist = float("inf")
+            closest_dist = float('inf')
             closest_point = None
             for kp in keypoints:
                 kpx, kpy = kp.pt
@@ -91,7 +91,7 @@ class ImageProcessing:
                 if dist < closest_dist:
                     closest_dist = dist
                     closest_point = (int(kpx), int(kpy))
-                if closest_point:
+            if closest_point:
                     self.annotated_points.append(closest_point)
                     cv2.circle(image, closest_point, 5, (0, 255, 0), -1)
                     cv2.imshow('Annotate Blobs', image)
