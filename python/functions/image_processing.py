@@ -147,6 +147,10 @@ class ImageProcessing:
         cv2.destroyAllWindows()
         self.save_marker_centers()
 
+    def open_json(self, name):
+        with open(name, 'r') as f:
+            marker_centers = json.load(f)
+        return marker_centers
 
     
 
