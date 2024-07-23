@@ -41,6 +41,7 @@ class ModelRobot:
                         self.tags_detected = True
                         print(f"Detected Tags: {self.tags_info}")
                         print("Tags Detected!")
+                        
 
                 cv2.namedWindow("Realsense Stream", cv2.WINDOW_AUTOSIZE)
                 cv2.imshow("Realsense", color_image)
@@ -82,16 +83,85 @@ class ModelRobot:
             return tags_info
         else:
             return None
-
-
-        
-
-    def getPose():
-        pass
-
-
-
-
-
-
     
+
+    def get_livestream_cam_pose(self):
+
+        tag_size = 4.5 # cm
+        obj_pts = np.array([
+            [-tag_size / 2, -tag_size / 2, 0],
+            [tag_size / 2, -tag_size / 2, 0], 
+            [tag_size / 2, tag_size / 2, 0],
+            [-tag_size / 2, tag_size / 2, 0]
+        ], dtype=np.float32)
+
+        img_pts = np.array(self.tags_info[14]['corners'], dtype=np.float32)
+
+        # Camera Matrix (Eventually not hardcoded)
+        camera_mat = np.array([[606.6510009765625, 0, 321.1846923828125], 
+                              [0, 606.622802734375, 246.59637451171875], 
+                              [0, 0, 1]], dtype=np.float32)
+        
+        distort_coef = np.zeros(5)
+
+        _, rvec, tvec = cv2.solvePnP(obj_pts, img_pts, camera_mat, distort_coef)
+
+        pose = self.transformation_matrix(rvec, tvec)
+
+        return pose
+    
+    def transformation_matrix(self, rvec, tvec):
+        rotation_mat, _ = cv2.Rodrigues(rvec)
+        
+        tmat = np.eye(4)
+        tmat[:3, :3] = rotation_mat
+        tmat[:3, 3] = tvec.flatten()
+
+        return tmat
+    
+    def detect_AprilTag_image(self, image):
+
+        image = cv2.imread(image)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        options = apriltag.DetectorOptions(families="tag16h5")
+        detector = apriltag.Detector(options)
+        tags = detector.detect(gray)
+
+        top_image = {}
+
+        for detections in tags:
+            id_ = detections.tag_id
+            top_image[detections.tag_id] = {
+                'corners': detections.corners,
+                'center': detections.center}
+            
+        return id_, top_image
+    
+    def get_pose_from_image(self, id_, dict):
+
+        tag_size = 4.5 # cm
+        obj_pts = np.array([
+            [-tag_size / 2, -tag_size / 2, 0],
+            [tag_size / 2, -tag_size / 2, 0], 
+            [tag_size / 2, tag_size / 2, 0],
+            [-tag_size / 2, tag_size / 2, 0]
+        ], dtype=np.float32)
+
+        img_pts = np.array(dict[id_]['corners'], dtype=np.float32)
+
+        # Camera Matrix (Eventually not hardcoded)
+        camera_mat = np.array([[606.6510009765625, 0, 321.1846923828125], 
+                              [0, 606.622802734375, 246.59637451171875], 
+                              [0, 0, 1]], dtype=np.float32)
+        
+        distort_coef = np.zeros(5)
+
+        _, rvec, tvec = cv2.solvePnP(obj_pts, img_pts, camera_mat, distort_coef)
+
+        pose = self.transformation_matrix(rvec, tvec)
+
+        return pose
+
+
+
