@@ -6,8 +6,9 @@ from model_robot_functions import ModelRobot
 flag = False
 image_directory = 'photos/'
 
-# Initialize class
+# Initialize class, start livestream
 model_robot = ModelRobot(image_directory, flag)
+model_robot.startLivestream()
 
 # Step #2: Image processing of top photo
 # Step #2a: Detect apriltag
