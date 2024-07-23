@@ -8,7 +8,7 @@ image_directory = 'photos/'
 
 # Initialize class, start livestream
 model_robot = ModelRobot(image_directory, flag)
-model_robot.startLivestream()
+model_robot.start_livestream()
 
 # Step #2: Image processing of top photo
 # Step #2a: Detect apriltag
