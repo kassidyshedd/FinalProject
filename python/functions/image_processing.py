@@ -8,7 +8,7 @@ import json
 class ImageProcessing:
 
     """ Add information about function"""
-    def __init__(self, image_directory):
+    def __init__(self, image_directory, flag=False):
 
         self.threshold = 100
         self.blur_kernel_size = 11
@@ -24,6 +24,10 @@ class ImageProcessing:
 
         self.annotated_points = []
         self.marker_centers_list = []
+
+        self.flag = flag
+
+        
 
     """ Add information about function """
     def on_trackbar_change(self, value):
@@ -145,8 +149,13 @@ class ImageProcessing:
                     break
 
         cv2.destroyAllWindows()
-        self.save_marker_centers()
 
+        if self.flag == False:
+            self.save_marker_centers()
+        else:
+            return self.marker_centers_list
+
+    """ Add information about function"""
     def open_json(self, name):
         with open(name, 'r') as f:
             marker_centers = json.load(f)
