@@ -1,0 +1,25 @@
+# config file from github
+/**:           # node name
+  ros__parameters:
+      # setup (defaults)
+      image_transport: "compressed"  # image format: "raw" or "compressed"
+      family: 16h5         # tag family name: 16h5, 25h9, 36h11
+      size: 0.10           # default tag edge size in meter
+      profile: false        # print profiling information to stdout
+
+      # tuning of detection (defaults)
+      max_hamming: 0        # maximum allowed hamming distance (corrected bits)
+      detector:
+        threads: 4         # number of threads
+        decimate: 1.0      # decimate resolution for quad detection
+        blur: 0.2         # sigma of Gaussian blur for quad detection
+        refine: 1           # snap to strong gradients
+        sharpening: 0.25    # sharpening of decoded images
+        debug: 0            # write additional debugging images to current working directory
+
+      # (optional) list of tags
+      # If defined, 'frames' and 'sizes' must have the same length as 'ids'.
+      tag:
+        ids:    [4, 14]         # tag IDs for which to publish transform
+        frames: ['base_tag', 'object_tag']           # frame names
+        sizes:  [0.04, 0.04]             # tag-specific edge size, overrides the default 'size'

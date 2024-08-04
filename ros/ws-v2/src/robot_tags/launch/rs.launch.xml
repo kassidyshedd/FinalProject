@@ -1,0 +1,19 @@
+<launch>
+
+    <arg name="rviz_config" default="frames.rviz"/>
+
+    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py"/>
+
+    <include file="$(find-pkg-share image_proc)/launch/image_proc.launch.py"/>
+
+    <node pkg="apriltag_ros" exec="apriltag_node" >
+        <param from="$(find-pkg-share robot_tags)/tags.yaml"/>
+        <remap from="/image_rect/compressed" to="/camera/camera/color/image_raw/compressed"/>
+        <remap from="/camera_info" to="/camera/camera/color/camera_info"/>
+    </node>
+
+    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share robot_tags)/$(var rviz_config)" />
+
+    <node pkg="robot_tags" exec="move_robot" name="move_robot" />
+
+</launch>
