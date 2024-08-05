@@ -1,6 +1,6 @@
 <launch>
 
-    <arg name="rviz_config" default="frames.rviz"/>
+    <arg name="rviz_config" default="vf.rviz"/>
 
     <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py"/>
 
@@ -12,8 +12,10 @@
         <remap from="/camera_info" to="/camera/camera/color/camera_info"/>
     </node>
 
-    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share robot_tags)/$(var rviz_config)" />
+    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share robot_tags)/vf.rviz" />
 
     <node pkg="robot_tags" exec="move_robot" name="move_robot" />
+
+    <node pkg="tf2_ros" exec="static_transform_publisher" name="static_transform_publisher_WB" args="0 -0.0775 0 0 0 0 base_tag world" />
 
 </launch>

@@ -8,13 +8,15 @@ from enum import Enum, auto
 from scipy.spatial.transform import Rotation as R
 import numpy as np
 import modern_robotics as mr
-import transformations as tr
+import tf_transformations
+import time
 
 
 class State(Enum):
 
     GET_TF = auto(),
     CALC = auto(),
+    INIT = auto(),
 
 
 class MoveRobot(Node):
@@ -31,38 +33,35 @@ class MoveRobot(Node):
 
         self.camera_to_base = None
         self.camera_to_object = None
+        self.world_to_base = None
 
-        self.state = State.GET_TF
+        self.state = State.INIT
 
 
-    def t_mat(self, tf):
+    def quat_to_mat(self, trans, rot):
 
-        tx, ty, tz = tf[:3]
-        qx, qy, qz, qw = tf[3:]
-
-        rotation = R.from_quat([qx, qy, qz, qw]).as_matrix()
-
-        tm = np.eye(4)
-        tm[:3, :3] = rotation
-        tm[:3, 3] = [tx, ty, tz]
-
-        return tm
+        T = tf_transformations.quaternion_matrix(rot)
+        T[:3, 3] = trans
+        
+        return T
     
-    def t(self, p, q):
-        norm = np.linalg.norm(q)
-        q = q / norm
-        g = tr.quaternion_matrix(q)
-        g[0:3, -1] = p
+    def mat_to_quat(self, T):
 
-        return g
+        trans = T[:3, 3]
+        rot = tf_transformations.quaternion_from_matrix(T)
 
-
+        return trans, rot    
 
     def timer_callback(self):
 
         camera_frame = "camera_color_optical_frame"
         base_frame = "base_tag"
         object_frame = "object_tag"
+        world_frame = "world"
+
+        if self.state == State.INIT:
+            time.sleep(5)
+            self.state = State.GET_TF
 
         if self.state == State.GET_TF:
             try:
@@ -97,23 +96,67 @@ class MoveRobot(Node):
             except TransformException as ex:
                 self.get_logger().info(f"Could not get transform {object_frame} to {camera_frame}: {ex}")
 
-            # if self.camera_to_base and self.camera_to_object is not None:
-            #     self.state = State.CALC
+            
+            try:
+                t = self.tf_buffer.lookup_transform(world_frame, base_frame, rclpy.time.Time())
+                self.world_to_base = [
+                    t.transform.translation.x,
+                    t.transform.translation.y,
+                    t.transform.translation.z,
+                    t.transform.rotation.x,
+                    t.transform.rotation.y,
+                    t.transform.rotation.z,
+                    t.transform.rotation.w]
+                
+                self.get_logger().info(f"Transform w2b: {self.world_to_base}")
+                
+            except TransformException as ex:
+                self.get_logger().info(f"Could not get transform {base_frame} to {world_frame}: {ex}")
+
+            
+            if self.camera_to_base and self.camera_to_object is not None:
+                self.state = State.CALC
 
         if self.state == State.CALC:
+
+            t_w2b = np.array([self.world_to_base[0], self.world_to_base[1], self.world_to_base[2]])
+            r_w2b = np.array([self.world_to_base[3], self.world_to_base[4], self.world_to_base[5], self.world_to_base[6]])
             
-            p_c2b = np.array([self.camera_to_base[0], self.camera_to_base[1], self.camera_to_base[2]])
-            q_c2b = np.array([self.camera_to_base[3], self.camera_to_base[4], self.camera_to_base[5], self.camera_to_base[6]])
-            T_c2b = self.t(p_c2b, q_c2b)
+            t_c2b = np.array([self.camera_to_base[0], self.camera_to_base[1], self.camera_to_base[2]])
+            r_c2b = np.array([self.camera_to_base[3], self.camera_to_base[4], self.camera_to_base[5], self.camera_to_base[6]])
 
-            p_c2o = np.array([self.camera_to_object[0], self.camera_to_object[1], self.camera_to_object[2]])
-            q_c2o = np.array([self.camera_to_object[3], self.camera_to_object[4], self.camera_to_object[5], self.camera_to_object[6]])
-            T_c2o = self.t(p_c2o, q_c2o)
 
-            T_b2c = mr.TransInv(T_c2b)
-            T_b2o = np.dot(T_b2c, T_c2o)
+            t_c2o = np.array([self.camera_to_object[0], self.camera_to_object[1], self.camera_to_object[2]])
+            r_c2o = np.array([self.camera_to_object[3], self.camera_to_object[4], self.camera_to_object[5], self.camera_to_object[6]])
 
-            self.get_logger().info(f"tm: {T_b2o}")
+            # Get transformation matrix
+            T_world_base = self.quat_to_mat(t_w2b, r_w2b)
+            T_camera_base = self.quat_to_mat(t_c2b, r_c2b)
+            T_camera_object = self.quat_to_mat(t_c2o, r_c2o)
+
+            # T_w2o = T_wb * T_cb.inv * T_co
+            # Get T_cb.inv
+            T_base_camera = mr.TransInv(T_camera_base)
+            # T_base_object = np.dot(T_base_camera, T_camera_object)
+
+            # Get T_wb * T_cb.inv
+            T_world_camera = np.dot(T_world_base, T_base_camera)
+
+            # Get T_w2o
+            T_world_object = np.dot(T_world_camera, T_camera_object)
+            
+
+            t, r = self.mat_to_quat(T_world_object)
+
+            # t, r = self.mat_to_quat(T_base_object)
+            ang = tf_transformations.euler_from_quaternion(r)
+
+            self.get_logger().info(f"T_base_object -- trans: {t}", once=True)
+            self.get_logger().info(f"T_base_object -- angles: {ang}", once=True)
+
+
+
+
 
 
 def main(args=None):
