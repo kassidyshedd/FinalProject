@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="tf2_ros" exec="static_transform_publisher" name="static_transform_publisher1" args="0 0 0 0 0 0 world top_camera" />
+    <node pkg="tf2_ros" exec="static_transform_publisher" name="static_transform_publisher2" args="0 0 0 0 0 0 world side_camera" />
+
+
+  <node pkg="robot_tags" exec="detection_in_image" name="detection_in_image" output="screen" />
+</launch>
