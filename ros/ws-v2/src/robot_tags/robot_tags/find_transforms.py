@@ -23,15 +23,7 @@ class FindTransforms(Node):
         self.tag_topcamera_object = None
         self.tag_sidecamera_object = None
 
-        self.P_world = None
-
-        # Camera intrinsic parameters 
-        self.camera_matrix = np.array([[608.5162963867188, 0, 319.7140808105469],
-                                       [0, 608.5162963867188, 248.23388671875],
-                                       [0, 0, 1]])
-        self.dist_coeffs = np.zeros(5)
-
-        self.tag_size = 0.075  
+        self.P_world = None  
 
         self.clicked_point = None
 
@@ -122,7 +114,7 @@ class FindTransforms(Node):
 
     def estimate_pose(self, detection):
 
-        tag_half_size = 0.075 / 2
+        tag_half_size = 0.1 / 2
         object_points = np.array([
             [-tag_half_size, -tag_half_size, 0],
             [ tag_half_size, -tag_half_size, 0],
@@ -175,7 +167,7 @@ class FindTransforms(Node):
         
             return P_world
         
-    def invert_z(self):
+    def invert_y(self):
 
         return np.array([
         [1, 0, 0, 0],
@@ -197,7 +189,7 @@ class FindTransforms(Node):
         T_world_tag = np.dot(T_world_live, T_live_tag)
         T_world_top = np.dot(T_world_tag, mr.TransInv(T_top_tag))
 
-        T_zfip = self.invert_z()
+        T_zfip = self.invert_y()
         T_zflip = np.dot(T_zfip, T_world_top)
 
         P_world = self.transform_point(P_top, T_zflip)

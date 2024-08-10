@@ -107,7 +107,7 @@ class MoveRobot(Node):
                     t.transform.rotation.y,
                     t.transform.rotation.z,
                     t.transform.rotation.w]
-                
+                s4
                 self.get_logger().info(f"Transform w2b: {self.world_to_base}")
                 
             except TransformException as ex:

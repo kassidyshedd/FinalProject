@@ -27,7 +27,8 @@ setup(
         'console_scripts': [
             'move_robot = robot_tags.move_robot:main',
             'capture_frame = robot_tags.save_frame:main',
-            'find_transforms = robot_tags.find_transforms:main'
+            'find_transforms = robot_tags.find_transforms:main',
+            'gui_node = robot_tags.gui:main'
             # 'click_to_point = robot_tags.click_to_point:main',
             # 'transform_point = robot_tags.transform_point:main',
         ],
