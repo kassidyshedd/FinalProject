@@ -15,7 +15,7 @@ class GuiNode(Node):
         self.window.title("Images")
 
         # GUI Sizing
-        window_width = 960
+        window_width = 1000
         window_height = 1080
         self.window.geometry(f"{window_width}x{window_height}")
 
@@ -27,15 +27,24 @@ class GuiNode(Node):
 
         vertical_padding = 50
 
-        top_frame = Frame(self.window, width=960, height=540)
+        top_frame = Frame(self.window, width=1000, height=540)
         top_frame.grid(row=0, column=0, columnspan=2, pady=(0, vertical_padding))
+        top_label = Label(top_frame, text="Livestream View", font=("Arial", 16))
+        top_label.pack(side="top", pady=5)
 
 
-        bottom_frame_left = Frame(self.window, width=480, height=540)
-        bottom_frame_left.grid(row=1, column=0)
+        left_label = Label(self.window, text="Top View", font=("Arial", 16))
+        left_label.grid(row=1, column=0, pady=(0, 5))
 
-        bottom_frame_right = Frame(self.window, width=480, height=540)
-        bottom_frame_right.grid(row=1, column=1)
+        # Create a frame for the bottom half (img2 and img3) with size 480x540
+        bottom_frame_left = Frame(self.window, width=500, height=540)
+        bottom_frame_left.grid(row=2, column=0)
+
+        right_label = Label(self.window, text="Side View", font=("Arial", 16))
+        right_label.grid(row=1, column=1, pady=(0, 5))
+
+        bottom_frame_right = Frame(self.window, width=500, height=540)
+        bottom_frame_right.grid(row=2, column=1)
 
         # Open Images
         livestream = Image.open("/home/kashedd/finalproject/code/ros/ws-v2/captured_frame.png")
@@ -43,9 +52,9 @@ class GuiNode(Node):
         side = Image.open("/home/kashedd/finalproject/pose_images/upload/fakeimg2.png")
 
         # Resize to fit in GUI
-        livestream = self.resize(livestream, (960, 540))
-        top = self.resize(top, (480, 540))
-        side = self.resize(side, (480, 540))
+        livestream = self.resize(livestream, (1000, 500))
+        top = self.resize(top, (500, 540))
+        side = self.resize(side, (500, 540))
 
         # Convert to photoimage
         livestream = ImageTk.PhotoImage(livestream)
