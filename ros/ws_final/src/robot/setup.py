@@ -12,13 +12,19 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob.glob('launch/*launch.*')),
-        ('share/' + package_name + '/config', glob.glob('config/*config.*')),
+        ('share/' + package_name + '/config', glob.glob('config/*')),
+        ('share/' + package_name + '/images', glob.glob('dicom/top_carm/*')),
+        ('share/' + package_name + '/images', glob.glob('dicom/side_carm/*')),
+        ('share/' + package_name + '/images', glob.glob('png/side_carm/*')),
+        ('share/' + package_name + '/images', glob.glob('png/side_carm/*'))
+
+
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Kassidy Shedd',
     maintainer_email='kass92800@gmail.com',
-    description='Handles all camera calibration, images processing, trajectory calculation, and robot movement',
+    description='Handles all camera calibration, image processing, trajectory calculation, and robot movement',
     license='MIT',
     tests_require=['pytest'],
     entry_points={
