@@ -10,7 +10,9 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name, ['package.xml',
+                                   'config/tags.yaml',
+                                   'config/rviz_config.rviz']),
         ('share/' + package_name + '/launch', glob.glob('launch/*launch.*')),
         ('share/' + package_name + '/config', glob.glob('config/*')),
         ('share/' + package_name + '/images', glob.glob('dicom/top_carm/*')),
@@ -29,7 +31,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'camera_calibration_node = robot.camera_calibration:main'
+            'camera_calibration_node = robot.camera_calibration:main',
+            'move_robot_node = robot.move_robot:main'
         ],
     },
 )

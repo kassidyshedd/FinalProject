@@ -17,7 +17,7 @@ import pydicom
 from PIL import Image
 
 
-class State(auto):
+class State(Enum):
     START = auto(),
     STOP = auto(),
 
@@ -38,7 +38,7 @@ class CameraCalibration(Node):
         self.timer = self.create_timer(1, self.timer_callback)
 
         # Declare a parameter, default is set to the intel realsense
-        self.declare_parameter('camera_type', 'side_carm')
+        self.declare_parameter('camera_type', 'realsense')
 
         self.state = State.START
 
@@ -79,8 +79,8 @@ class CameraCalibration(Node):
                 # 1. Make sure intel realsense is running
                 pipeline = rs.pipeline()
                 config = rs.config()
-                config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-                config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+                config.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 30)
+                config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
 
                 try:
                     pipeline.start(config)

@@ -31,6 +31,7 @@ class BlobDetection:
         image = cv2.imread(image_path)
         height, width, channels = image.shape
         return width, height, channels
+    
 
     
     def on_trackbar_change(self, val):
