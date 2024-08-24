@@ -4,6 +4,7 @@ from enum import Enum, auto
 import yaml
 import numpy as np
 import cv2
+from interbotix_xs_modules.xs_robot.arm import InterbotixManipulatorXS
 from robot.move_robot_functions import MoveRobotCalculations
 
 from tf2_ros import TransformBroadcaster
@@ -12,6 +13,9 @@ from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
+from geometry_msgs.msg import PointStamped
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import Point
 
 
 class State(Enum):
@@ -69,21 +73,28 @@ class MoveRobot(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self)
         self.br = TransformBroadcaster(self)
 
+        # Publisher
+        self.point_pub = self.create_publisher(PointStamped, 'entry', 10)
+        self.traj_pub = self.create_publisher(Marker, 'trajectory', 10)
+
         # Timer
         self.timer = self.create_timer(0.05, self.timer_callback)
 
         # Initialize Variables
         self.camera_to_base = None
         self.camera_to_object = None
-        self.world_to_base = None
+        self.world_to_base = None   
+        self.point = None
 
         self.state = State.TF
 
         # Photos 
-        image1 = '/home/kashedd/Desktop/FinalProject/imageprocessig/image1.png'
-        image2 = '/home/kashedd/Desktop/FinalProject/imageprocessig/image2.png'
+        image1 = '/home/kashedd/Desktop/FinalProject/imageprocessig/DEMODAYTAG14.png'
+        image2 = '/home/kashedd/Desktop/FinalProject/imageprocessig/DEMODAYTAGBOTH.png'
+        top = '/home/kashedd/Desktop/FinalProject/at-compute/savedxray2/IM00002.png'
+        side = '/home/kashedd/Desktop/FinalProject/at-compute/savedxray2/IM00001.png'
 
-        self.photo_array = [image1, image2]
+        self.photo_array = [image1, image2, top, side]
         self.mrc.open_images(self.photo_array)
 
 
@@ -143,89 +154,133 @@ class MoveRobot(Node):
             # except TransformException as ex:
             #     self.get_logger().info(f"Could not get transform {tag4_frame} to {world_frame}: {ex}")
 
+            point = self.mrc.get_point()
+            self.point = point
+            # self.get_logger().info(f"Point: {self.point}")
+            if point is not None:
+                pt = PointStamped()
+                pt.header.stamp = self.get_clock().now().to_msg()
+                pt.header.frame_id = 'world'
+                pt.point.x = point[0][0]
+                pt.point.y = point[1][0]
+                pt.point.z = point[2][0]
+                self.point_pub.publish(pt)
 
-            tw = TransformStamped()
+                m = Marker()
+                m.header.frame_id = 'world'
+                m.header.stamp = self.get_clock().now().to_msg()
+                m.ns = 'traj'
+                m.id = 0
+                m.type = Marker.ARROW
+                m.action = Marker.ADD
+                m.scale.x = 0.01
+                m.scale.y = 0.02
+                m.color.r = 1.0
+                m.color.a = 1.0
 
-            # Set header
-            tw.header.stamp = self.get_clock().now().to_msg()
-            tw.header.frame_id = 'tag4_frame'  # Reference frame
-            tw.child_frame_id = 'world'  # Tag frame
+                # Entry
+                ep = Point()
+                ep.x = point[0][0]
+                ep.y = point[1][0]
+                ep.z = point[2][0]
+                
+                # Target
+                tp = Point()
+                tp.x = point[0][0] + 0.13
+                tp.y = point[1][0] -0.13
+                tp.z = point[2][0] - 0.1
 
-            # Set translation (tvec)
-            tw.transform.translation.x = 0.0
-            tw.transform.translation.y = -0.1141
-            tw.transform.translation.z = 0.0
+                m.points.append(ep)
+                m.points.append(tp)
 
-            # Set rotation (quaternion)
-            tw.transform.rotation.x = 0.0
-            tw.transform.rotation.y = 0.0
-            tw.transform.rotation.z = 0.0
-            tw.transform.rotation.w = 1.0
+                self.traj_pub.publish(m)
 
-            # Publish the transform
-            self.br.sendTransform(tw)
+
+
+
+
+            # tw = TransformStamped()
+
+            # # Set header
+            # tw.header.stamp = self.get_clock().now().to_msg()
+            # tw.header.frame_id = 'tag4_frame'  # Reference frame
+            # tw.child_frame_id = 'world'  # Tag frame
+
+            # # Set translation (tvec)
+            # tw.transform.translation.x = 0.0
+            # tw.transform.translation.y = -0.1141
+            # tw.transform.translation.z = 0.0
+
+            # # Set rotation (quaternion)
+            # tw.transform.rotation.x = 0.0
+            # tw.transform.rotation.y = 0.0
+            # tw.transform.rotation.z = 0.0
+            # tw.transform.rotation.w = 1.0
+
+            # # Publish the transform
+            # self.br.sendTransform(tw)
 
             
-            rs_tag4 = self.mrc.get_rs_tag4() 
-            self.tvec = rs_tag4['tvec']  
-            rotation_matrix, _ = cv2.Rodrigues(np.array(rs_tag4['rvec_corrected']))
-            T = np.eye(4)
-            T[:3, :3] = rotation_matrix
+            # rs_tag4 = self.mrc.get_rs_tag4() 
+            # self.tvec = rs_tag4['tvec']  
+            # rotation_matrix, _ = cv2.Rodrigues(np.array(rs_tag4['rvec_corrected']))
+            # T = np.eye(4)
+            # T[:3, :3] = rotation_matrix
 
-            # Convert the rotation matrix to a quaternion
-            quaternion = quaternion_from_matrix(T)
+            # # Convert the rotation matrix to a quaternion
+            # quaternion = quaternion_from_matrix(T)
 
-            # Create a TransformStamped message
-            t = TransformStamped()
+            # # Create a TransformStamped message
+            # t = TransformStamped()
 
-            # Set header
-            t.header.stamp = self.get_clock().now().to_msg()
-            t.header.frame_id = 'camera_frame'  # Reference frame
-            t.child_frame_id = 'tag4_frame'  # Tag frame
+            # # Set header
+            # t.header.stamp = self.get_clock().now().to_msg()
+            # t.header.frame_id = 'camera_frame'  # Reference frame
+            # t.child_frame_id = 'tag4_frame'  # Tag frame
 
-            # Set translation (tvec)
-            t.transform.translation.x = self.tvec[0][0]
-            t.transform.translation.y = self.tvec[1][0]
-            t.transform.translation.z = self.tvec[2][0]
+            # # Set translation (tvec)
+            # t.transform.translation.x = self.tvec[0][0]
+            # t.transform.translation.y = self.tvec[1][0]
+            # t.transform.translation.z = self.tvec[2][0]
 
-            # Set rotation (quaternion)
-            t.transform.rotation.x = quaternion[0]
-            t.transform.rotation.y = quaternion[1]
-            t.transform.rotation.z = quaternion[2]
-            t.transform.rotation.w = quaternion[3]
+            # # Set rotation (quaternion)
+            # t.transform.rotation.x = quaternion[0]
+            # t.transform.rotation.y = quaternion[1]
+            # t.transform.rotation.z = quaternion[2]
+            # t.transform.rotation.w = quaternion[3]
 
-            # Publish the transform
-            self.br.sendTransform(t)
+            # # Publish the transform
+            # self.br.sendTransform(t)
 
-            rs_tag14 = self.mrc.get_rs_tag14() 
-            self.tvec1 = rs_tag14['tvec']  
-            rotation_matrix1, _ = cv2.Rodrigues(np.array(rs_tag14['rvec']))
-            T1 = np.eye(4)
-            T1[:3, :3] = rotation_matrix1
-            quaternion1 = quaternion_from_matrix(T1)
+            # rs_tag14 = self.mrc.get_rs_tag14() 
+            # self.tvec1 = rs_tag14['tvec']  
+            # rotation_matrix1, _ = cv2.Rodrigues(np.array(rs_tag14['rvec']))
+            # T1 = np.eye(4)
+            # T1[:3, :3] = rotation_matrix1
+            # quaternion1 = quaternion_from_matrix(T1)
 
 
-            tz = TransformStamped()
+            # tz = TransformStamped()
 
-            # Set header
-            tz.header.stamp = self.get_clock().now().to_msg()
-            tz.header.frame_id = 'camera_frame'  # Reference frame
-            tz.child_frame_id = 'tag14_frame'  # Tag frame
+            # # Set header
+            # tz.header.stamp = self.get_clock().now().to_msg()
+            # tz.header.frame_id = 'camera_frame'  # Reference frame
+            # tz.child_frame_id = 'tag14_frame'  # Tag frame
 
-            # Set translation (tvec)
-            tz.transform.translation.x = self.tvec1[0][0]
-            tz.transform.translation.y = self.tvec1[1][0]
-            tz.transform.translation.z = self.tvec1[2][0]
+            # # Set translation (tvec)
+            # tz.transform.translation.x = self.tvec1[0][0]
+            # tz.transform.translation.y = self.tvec1[1][0]
+            # tz.transform.translation.z = self.tvec1[2][0]
 
-            # Set rotation (quaternion)
-            tz.transform.rotation.x = quaternion1[0]
-            tz.transform.rotation.y = quaternion1[1]
-            tz.transform.rotation.z = quaternion1[2]
-            tz.transform.rotation.w = quaternion1[3]
+            # # Set rotation (quaternion)
+            # tz.transform.rotation.x = quaternion1[0]
+            # tz.transform.rotation.y = quaternion1[1]
+            # tz.transform.rotation.z = quaternion1[2]
+            # tz.transform.rotation.w = quaternion1[3]
 
-            # Publish the transform
-            self.br.sendTransform(tz)
-            # self.get_logger.info("Publishing?")
+            # # Publish the transform
+            # self.br.sendTransform(tz)
+            # # self.get_logger.info("Publishing?")
 
 
             # # Send transforms to MRC
