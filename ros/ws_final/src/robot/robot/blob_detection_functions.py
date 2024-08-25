@@ -42,6 +42,8 @@ window_name : str
     Name of the OpenCV window used for displaying images.
 """
 
+# ########## BEGIN CITATION #3 ##########
+# ########## BEGIN CITATION #4 ##########
 
 class BlobDetection:
     def __init__(self, image_dir=None, image_path=None, json_filename='marker_centers.json'):
@@ -77,6 +79,7 @@ class BlobDetection:
         self.setup_trackbars()
 
 
+    # ########## BEGIN CITATION #5 ##########
     """
     Gets the dimensions of the image at the specified path.
 
@@ -234,6 +237,8 @@ class BlobDetection:
     param : tuple
         Additional parameters, including the image, keypoints, and scaling factor.
     """
+
+    # ########## Citation 10 ##########
     def on_mouse(self, event, x, y, flags, param):
         image, keypoints, scaling_factor = param
         if event == cv2.EVENT_LBUTTONDOWN:

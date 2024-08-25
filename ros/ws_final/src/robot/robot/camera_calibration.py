@@ -21,6 +21,7 @@ class State(Enum):
     START = auto(),
     STOP = auto(),
 
+
 """
     A ROS2 node for performing camera calibration for different camera types, including Intel RealSense and C-Arm cameras.
 
@@ -50,6 +51,7 @@ class CameraCalibration(Node):
         self.state = State.START
 
 
+    # ########## CITATION 7 ##########
     """
         Converts a DICOM image to a PNG image.
 
@@ -207,6 +209,8 @@ class CameraCalibration(Node):
                 with open('fiducial3.json', 'w') as f:
                     json.dump(fiducial3, f)
 
+                # ########## Begin citation 8 ##########
+                # ########## Begin citation 9 ##########
                 # 4. Calculate Intrinsics
                 all_fid1_pts = []
                 fid1_obj_pts = []

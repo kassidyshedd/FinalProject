@@ -89,7 +89,7 @@ class MoveRobotCalculations:
 
     
     def detect_tags(self, image, index, path):
-        # First 2 photos will use apriltag library (taken with realsense) (if testing irl all 4 will use)
+        # First 2 photos will use apriltag library (taken with realsense) 
         if index == 0 or index == 1:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             options = apriltag.DetectorOptions(families="tag16h5")
@@ -140,7 +140,7 @@ class MoveRobotCalculations:
                 all_fid_obj_pts.append(self.fid1_obj_pts)
                 all_f1_pts.append(np.array(mc, dtype=np.float32))
 
-            # Concatenate all points into single numpy arrays
+    
             all_fid_obj_pts = np.vstack(all_fid_obj_pts)
             all_f1_pts = np.vstack(all_f1_pts)
 
@@ -162,7 +162,7 @@ class MoveRobotCalculations:
                 all_fid_obj_pts.append(self.fid_obj_pts)
                 all_fs_pts.append(np.array(mc, dtype=np.float32))
 
-            # Concatenate all points into single numpy arrays
+
             all_fid_obj_pts = np.vstack(all_fid_obj_pts)
             all_fs_pts = np.vstack(all_fs_pts)
 
@@ -247,6 +247,7 @@ class MoveRobotCalculations:
         return T
     
 
+    # ########## Citation 10 ##########
     def click_event(self, event, x, y, flags, params, index):
         if event == cv2.EVENT_LBUTTONDOWN:
             if index == 0:
@@ -277,9 +278,9 @@ class MoveRobotCalculations:
 
                 # Calculate roll, pitch, and yaw
                 yaw = np.arctan2(dy, dx)  # Yaw around Z-axis
-                pitch = np.arctan2(-dz, np.sqrt(dx**2 + dy**2))  # Pitch around Y-axis
+                pitch = np.arctan2(-dz, np.sqrt(dx**2 + dy**2))  
                 
-     
+    # ########## Citation 11 ##########
     def triangulate_entry(self):
         # Testing Transforms
         # 1. I want P_tag4 -- P_world = [0.1, 0.1, 0.1]

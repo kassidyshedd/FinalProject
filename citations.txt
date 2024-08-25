@@ -1,0 +1,32 @@
+1. Hosseinian S, Arefi H, Navab N. Toward an End-to-End Calibration for Mobile C-Arm in Combination with a Depth Sensor for Surgical Augmented Reality Applications. 
+   Sensors. 2020; 20(1):36. https://doi.org/10.3390/s20010036
+
+2. Albiol F, Corbi A, Albiol A. Evaluation of modern camera calibration techniques for conventional diagnostic X-ray imaging settings. 
+   Radiol Phys Technol. 2017 Mar;10(1):68-81. doi: 10.1007/s12194-016-0369-y. Epub 2016 Jul 18. PMID: 27431651.
+
+3. Blob detection -- blob_detection_functions.py
+   https://learnopencv.com/blob-detection-using-opencv-python-c/
+
+4. Trackbar creation -- blob_detection_functions.py
+   https://docs.opencv.org/4.x/da/d6a/tutorial_trackbar.html
+
+5. Image Shape -- blob_detection_functions.py
+   https://note.nkmk.me/en/python-opencv-pillow-image-size/
+
+6. Image Resize -- blob_detection_functions.py
+   https://www.geeksforgeeks.org/image-resizing-using-opencv-python/
+
+7. DICOM to PNG -- camera_calibration.py
+   https://pycad.co/how-to-convert-a-dicom-image-into-jpg-or-png/ 
+
+8. solvePnP -- camera_calibration.py, move_robot_functions.py
+   https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html
+
+9. Camera Calibration -- camera_calibration.py
+   https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
+
+10. Click capture -- camera_calibration.py, move_robot_functions.py
+    https://stackoverflow.com/questions/73721420/how-to-detect-a-click-in-python-opencv
+
+11. Point Triangulation -- move_robot_functions.py
+    https://docs.opencv.org/4.x/d0/dbd/group__triangulation.html#ga211c855276b3084f3bbd8b2d9161dc74

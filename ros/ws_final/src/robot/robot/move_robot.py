@@ -84,10 +84,10 @@ class MoveRobot(Node):
         self.state = State.TF
 
         # Photos 
-        image1 = '/home/kashedd/Desktop/FinalProject/imageprocessig/DEMODAYTAG14.png'
-        image2 = '/home/kashedd/Desktop/FinalProject/imageprocessig/DEMODAYTAGBOTH.png'
-        top = '/home/kashedd/Desktop/FinalProject/at-compute/savedxray2/IM00002.png'
-        side = '/home/kashedd/Desktop/FinalProject/at-compute/savedxray2/IM00001.png'
+        image1 = 'DEMODAYTAG14.png'
+        image2 = 'DEMODAYTAGBOTH.png'
+        top = 'IM00002.png'
+        side = 'IM00001.png'
 
         self.photo_array = [image1, image2, top, side]
         self.mrc.open_images(self.photo_array)
