@@ -21,14 +21,21 @@ class State(Enum):
     START = auto(),
     STOP = auto(),
 
-
 """
-Performs 3 types of camera calibration:
-    1. realsense
-    2. top_carm
-    3. side_carm
-"""
+    A ROS2 node for performing camera calibration for different camera types, including Intel RealSense and C-Arm cameras.
 
+    The node can calibrate intrinsics for:
+    1. Intel RealSense camera.
+    2. Top C-Arm camera.
+    3. Side C-Arm camera.
+
+    Attributes:
+    -----------
+    timer : rclpy.timer.Timer
+        Timer for triggering the calibration process.
+    state : State
+        The current state of the calibration process (START or STOP).
+"""
 class CameraCalibration(Node):
 
     def __init__(self):
@@ -42,6 +49,17 @@ class CameraCalibration(Node):
 
         self.state = State.START
 
+
+    """
+        Converts a DICOM image to a PNG image.
+
+        Parameters:
+        -----------
+        dicom : str
+            Path to the input DICOM file.
+        png : str
+            Path where the output PNG file will be saved.
+    """
     def dicom_to_png(self, dicom, png):
         dicom_img = pydicom.dcmread(dicom)
         pixel_array = dicom_img.pixel_array
@@ -52,12 +70,35 @@ class CameraCalibration(Node):
         png_img = Image.fromarray(norm_array)
         png_img.save(png)
 
+
+    """
+        Computes the reprojection error for the camera calibration process.
+
+        Parameters:
+        -----------
+        obj_points : list of ndarray
+            List of 3D object points in the world coordinate space.
+        img_points : list of ndarray
+            List of 2D points in the image plane.
+        rvecs : list of ndarray
+            List of rotation vectors estimated during calibration.
+        tvecs : list of ndarray
+            List of translation vectors estimated during calibration.
+        camera_matrix : ndarray
+            Camera matrix (intrinsics).
+        dist_coeffs : ndarray
+            Distortion coefficients.
+
+        Returns:
+        --------
+        mean_error : float
+            The mean reprojection error for the calibration.
+    """
     def compute_reprojection_error(self, obj_points, img_points, rvecs, tvecs, camera_matrix, dist_coeffs):
         total_error = 0
         for i in range(len(obj_points)):
             img_points2, _ = cv2.projectPoints(obj_points[i], rvecs[i], tvecs[i], camera_matrix, dist_coeffs)
             
-            # Ensure img_points[i] and img_points2 have the same shape
             img_points_actual = np.array(img_points[i], dtype=np.float32).reshape(-1, 2)
             img_points_projected = img_points2.reshape(-1, 2)
 
@@ -143,11 +184,11 @@ class CameraCalibration(Node):
                         self.dicom_to_png(dicom_path, png_path)
                         
                 # 3. Blob Detection / saves marker centers
-                blob_detector = BlobDetection(save_dir)
+                blob_detector = BlobDetection(image_dir=save_dir)
                 width, height, channels = blob_detector.get_image_size(png_path)
                 blob_detector.run()
 
-                # SAVING FIX_LATER
+
                 with open('marker_centers.json', 'r') as file:
                     data = json.load(file)
                 fiducial1 = []

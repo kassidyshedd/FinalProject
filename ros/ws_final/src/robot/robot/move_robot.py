@@ -3,14 +3,9 @@ from rclpy.node import Node
 from enum import Enum, auto
 import yaml
 import numpy as np
-import cv2
-from interbotix_xs_modules.xs_robot.arm import InterbotixManipulatorXS
 from robot.move_robot_functions import MoveRobotCalculations
 
 from tf2_ros import TransformBroadcaster
-from transformations import quaternion_from_matrix
-from geometry_msgs.msg import TransformStamped
-from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 from geometry_msgs.msg import PointStamped
@@ -107,53 +102,6 @@ class MoveRobot(Node):
             tag14_frame = "tag14"
             world_frame = "world"
 
-            # try:
-            #     t = self.tf_buffer.lookup_transform(camera_frame, tag4_frame, rclpy.time.Time())
-            #     self.camera_to_base = [
-            #         t.transform.translation.x,
-            #         t.transform.translation.y,
-            #         t.transform.translation.z,
-            #         t.transform.rotation.x,
-            #         t.transform.rotation.y,
-            #         t.transform.rotation.z,
-            #         t.transform.rotation.w]
-                
-            #     # self.get_logger().info(f"Transform c2b: {self.camera_to_base}")
-                
-            # except TransformException as ex:
-            #     self.get_logger().info(f"Could not get transform {tag4_frame} to {camera_frame}: {ex}")
-
-            # try:
-            #     t = self.tf_buffer.lookup_transform(camera_frame, tag14_frame, rclpy.time.Time())
-            #     self.camera_to_object = [
-            #         t.transform.translation.x,
-            #         t.transform.translation.y,
-            #         t.transform.translation.z,
-            #         t.transform.rotation.x,
-            #         t.transform.rotation.y,
-            #         t.transform.rotation.z,
-            #         t.transform.rotation.w]
-                
-            #     # self.get_logger().info(f"Transform c2o: {self.camera_to_object}")
-                
-            # except TransformException as ex:
-            #     self.get_logger().info(f"Could not get transform {tag14_frame} to {camera_frame}: {ex}")
-
-            # try:
-            #     t = self.tf_buffer.lookup_transform(world_frame, tag4_frame, rclpy.time.Time())
-            #     self.world_to_base = [
-            #         t.transform.translation.x,
-            #         t.transform.translation.y,
-            #         t.transform.translation.z,
-            #         t.transform.rotation.x,
-            #         t.transform.rotation.y,
-            #         t.transform.rotation.z,
-            #         t.transform.rotation.w]
-            #     # self.get_logger().info(f"Transform w2b: {self.world_to_base}")
-                
-            # except TransformException as ex:
-            #     self.get_logger().info(f"Could not get transform {tag4_frame} to {world_frame}: {ex}")
-
             point = self.mrc.get_point()
             self.point = point
             # self.get_logger().info(f"Point: {self.point}")
@@ -186,105 +134,14 @@ class MoveRobot(Node):
                 
                 # Target
                 tp = Point()
-                tp.x = point[0][0] + 0.13
-                tp.y = point[1][0] -0.13
-                tp.z = point[2][0] - 0.1
+                tp.x = point[0][0] 
+                tp.y = point[1][0] 
+                tp.z = point[2][0] 
 
                 m.points.append(ep)
                 m.points.append(tp)
 
                 self.traj_pub.publish(m)
-
-
-
-
-
-            # tw = TransformStamped()
-
-            # # Set header
-            # tw.header.stamp = self.get_clock().now().to_msg()
-            # tw.header.frame_id = 'tag4_frame'  # Reference frame
-            # tw.child_frame_id = 'world'  # Tag frame
-
-            # # Set translation (tvec)
-            # tw.transform.translation.x = 0.0
-            # tw.transform.translation.y = -0.1141
-            # tw.transform.translation.z = 0.0
-
-            # # Set rotation (quaternion)
-            # tw.transform.rotation.x = 0.0
-            # tw.transform.rotation.y = 0.0
-            # tw.transform.rotation.z = 0.0
-            # tw.transform.rotation.w = 1.0
-
-            # # Publish the transform
-            # self.br.sendTransform(tw)
-
-            
-            # rs_tag4 = self.mrc.get_rs_tag4() 
-            # self.tvec = rs_tag4['tvec']  
-            # rotation_matrix, _ = cv2.Rodrigues(np.array(rs_tag4['rvec_corrected']))
-            # T = np.eye(4)
-            # T[:3, :3] = rotation_matrix
-
-            # # Convert the rotation matrix to a quaternion
-            # quaternion = quaternion_from_matrix(T)
-
-            # # Create a TransformStamped message
-            # t = TransformStamped()
-
-            # # Set header
-            # t.header.stamp = self.get_clock().now().to_msg()
-            # t.header.frame_id = 'camera_frame'  # Reference frame
-            # t.child_frame_id = 'tag4_frame'  # Tag frame
-
-            # # Set translation (tvec)
-            # t.transform.translation.x = self.tvec[0][0]
-            # t.transform.translation.y = self.tvec[1][0]
-            # t.transform.translation.z = self.tvec[2][0]
-
-            # # Set rotation (quaternion)
-            # t.transform.rotation.x = quaternion[0]
-            # t.transform.rotation.y = quaternion[1]
-            # t.transform.rotation.z = quaternion[2]
-            # t.transform.rotation.w = quaternion[3]
-
-            # # Publish the transform
-            # self.br.sendTransform(t)
-
-            # rs_tag14 = self.mrc.get_rs_tag14() 
-            # self.tvec1 = rs_tag14['tvec']  
-            # rotation_matrix1, _ = cv2.Rodrigues(np.array(rs_tag14['rvec']))
-            # T1 = np.eye(4)
-            # T1[:3, :3] = rotation_matrix1
-            # quaternion1 = quaternion_from_matrix(T1)
-
-
-            # tz = TransformStamped()
-
-            # # Set header
-            # tz.header.stamp = self.get_clock().now().to_msg()
-            # tz.header.frame_id = 'camera_frame'  # Reference frame
-            # tz.child_frame_id = 'tag14_frame'  # Tag frame
-
-            # # Set translation (tvec)
-            # tz.transform.translation.x = self.tvec1[0][0]
-            # tz.transform.translation.y = self.tvec1[1][0]
-            # tz.transform.translation.z = self.tvec1[2][0]
-
-            # # Set rotation (quaternion)
-            # tz.transform.rotation.x = quaternion1[0]
-            # tz.transform.rotation.y = quaternion1[1]
-            # tz.transform.rotation.z = quaternion1[2]
-            # tz.transform.rotation.w = quaternion1[3]
-
-            # # Publish the transform
-            # self.br.sendTransform(tz)
-            # # self.get_logger.info("Publishing?")
-
-
-            # # Send transforms to MRC
-            # self.mrc.send_tfs(self.camera_to_base, self.camera_to_object, self.world_to_base)
 
 def main(args=None):
     rclpy.init(args=args)

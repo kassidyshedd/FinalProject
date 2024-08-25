@@ -266,18 +266,18 @@ class MoveRobotCalculations:
                 P_entry = self.triangulate_entry()
                 P_target = self.triangulate_target()
 
-                # x =  P_target[0] - P_entry[0] 
-                # y =  P_target[1] - P_entry[1] 
-                # z =  P_target[2] - P_entry[2] 
+                x =  P_target[0] - P_entry[0] 
+                y =  P_target[1] - P_entry[1] 
+                z =  P_target[2] - P_entry[2] 
 
-                # norm = np.sqrt(x**2 + y**2 + z**2)
-                # dx = x / norm
-                # dy = y / norm
-                # dz = z / norm
+                norm = np.sqrt(x**2 + y**2 + z**2)
+                dx = x / norm
+                dy = y / norm
+                dz = z / norm
 
-                # # Calculate roll, pitch, and yaw
-                # yaw = np.arctan2(dy, dx)  # Yaw around Z-axis
-                # pitch = np.arctan2(-dz, np.sqrt(dx**2 + dy**2))  # Pitch around Y-axis
+                # Calculate roll, pitch, and yaw
+                yaw = np.arctan2(dy, dx)  # Yaw around Z-axis
+                pitch = np.arctan2(-dz, np.sqrt(dx**2 + dy**2))  # Pitch around Y-axis
                 
      
     def triangulate_entry(self):
